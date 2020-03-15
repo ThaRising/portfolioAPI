@@ -1,0 +1,16 @@
+# Exclude Environment and Config files
+.idea
+venv
+*.env
+
+# Exclude compiled files
+__pycache__
+*.pyc
+
+# Exclude build files
+*.spec
+build
+dist
+
+# Exclude test databases
+*.db
