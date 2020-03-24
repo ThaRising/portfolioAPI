@@ -1,5 +1,3 @@
-# !python3
-# -*- coding: utf-8 -*-
+from .controller import ShopDigitalController
 
-if __name__ == "__main__":
-    pass
+__all__ = ["ShopDigitalController"]

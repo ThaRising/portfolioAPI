@@ -2,6 +2,10 @@ class AmbiguousTypeError(Exception):
     pass
 
 
+class AmbiguousFieldError(Exception):
+    pass
+
+
 class DataIntegrityError(Exception):
     pass
 

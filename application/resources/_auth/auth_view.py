@@ -5,10 +5,15 @@ from ...extensions import guard, limit
 from flask import abort
 from flask import make_response
 from flask.views import MethodView
+from flask_praetorian import auth_required
 
 
 class Auth(MethodView):
-    decorators = [limit.limit("3/minute;5/hour;10/day")]
+    decorators = [limit.limit("5/minute;10/hour;25/day")]
+
+    @auth_required
+    def get(self):
+        return make_response("Valid", 200)
 
     @use_kwargs(UserSchema, locations=("json",))
     def post(self, **kwargs):

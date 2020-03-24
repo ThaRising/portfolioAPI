@@ -1,7 +1,7 @@
 from ...extensions import ma, db
 from datetime import datetime
 from marshmallow import post_dump
-from ..image import Image, ImageSchema
+from .._image import Image, ImageSchema
 
 
 class PortfolioVideo(db.Model):

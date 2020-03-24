@@ -1,6 +1,7 @@
 from flask import Flask
 from .extensions import db, ma, api, guard, limit
 from inspect import isclass
+from pathlib import Path
 
 
 class Prod:
@@ -9,10 +10,10 @@ class Prod:
     SQLALCHEMY_DATABASE_URI = "sqlite:///data.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "top_secret"
-    JWT_ACCESS_LIFESPAN = {'hours': 3}
+    JWT_ACCESS_LIFESPAN = {'hours': 2}
     JWT_REFRESH_LIFESPAN = {'days': 1}
     RATELIMIT_STRATEGY = "fixed-window-elastic-expiry"
-    IMAGE_UPLOADS = "/uploads"
+    IMAGE_UPLOADS = Path(__file__).parent.parent / "uploads"
 
 
 class Dev(Prod):
@@ -39,8 +40,10 @@ def create_app(env: any = ""):
     app.cli.add_command(create_admin)
 
     with app.app_context():
-        from .resources import portfolio_api, Auth
+        from .resources.shop_digital.schema import ShopDigital
+        from .resources import portfolio_api, shop_api, Auth
         api.add_namespace(portfolio_api, path="/portfolio")
+        api.add_namespace(shop_api, path="/shop")
         app.add_url_rule('/login/', view_func=Auth.as_view('auth'))
 
         @app.after_request

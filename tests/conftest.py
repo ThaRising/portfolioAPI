@@ -2,6 +2,8 @@ import pytest
 from application import create_app
 from application.extensions import db, guard
 from application.resources._auth.schema import User
+from application.resources.portfolio_image.schema import PortfolioImage
+from application.resources.portfolio_video.schema import PortfolioVideo
 
 
 class Testing:
@@ -31,7 +33,14 @@ def test_client():
 def init_db():
     db.create_all()
     db.session.add(User(
-        username="admin", password=guard.hash_password("admin"), roles="admin"))
+        username="admin", password=guard.hash_password("admin"), roles="admin"
+    ))
+    db.session.add(PortfolioImage(
+        title="Test", category="portrait", client="Der Boi"
+    ))
+    db.session.add(PortfolioVideo(
+        title="Test", category="aftermovie", client="Der Boi", video="ilusrhgiur"
+    ))
     db.session.commit()
 
     yield db

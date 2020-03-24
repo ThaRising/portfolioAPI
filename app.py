@@ -3,7 +3,7 @@
 
 from application import create_app
 
-app = create_app("dev")
+app = create_app()
 host = "0.0.0.0"
 
 if __name__ == "__main__":
