@@ -32,6 +32,10 @@ class ShopCollection(Resource):
 
 @api.route("/<string:id_>")
 class ShopItem(Resource):
+    @use_args(QueryArgs(only=("fields",)), locations=("query",))
+    def get(self, *args, **kwargs):
+        return ShopDigitalController().get({"id": kwargs.get("id_")}, fields=args[0].get("fields"))
+
     @roles_required("admin")
     @use_args(QueryArgs(only=("fields",)), locations=("query",))
     @use_args(PatchArgs, locations=("json",))
