@@ -1,24 +1,7 @@
 from flask import Flask
 from .extensions import db, ma, api, guard, limit
 from inspect import isclass
-from pathlib import Path
-
-
-class Prod:
-    DEBUG = False
-    TESTING = False
-    SQLALCHEMY_DATABASE_URI = "sqlite:///data.db"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = "top_secret"
-    JWT_ACCESS_LIFESPAN = {'hours': 2}
-    JWT_REFRESH_LIFESPAN = {'days': 1}
-    RATELIMIT_STRATEGY = "fixed-window-elastic-expiry"
-    IMAGE_UPLOADS = Path(__file__).parent.parent / "uploads"
-
-
-class Dev(Prod):
-    DEBUG = True
-    TESTING = True
+from .config import Prod, Stag
 
 
 def create_app(env: any = ""):
@@ -26,7 +9,7 @@ def create_app(env: any = ""):
     if isclass(env):
         app.config.from_object(env())
     else:
-        app.config.from_object(Prod if not env else Dev)
+        app.config.from_object(Stag if not env else Prod)
 
     db.init_app(app)
     ma.init_app(app)
