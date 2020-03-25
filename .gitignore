@@ -2,6 +2,7 @@
 .idea
 venv
 *.env
+application/config.py
 
 # Exclude compiled files
 __pycache__
