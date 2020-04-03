@@ -16,3 +16,7 @@ class DataEncodingError(Exception):
 
 class DataRangeError(Exception):
     pass
+
+
+class InvalidPurchaseItem(Exception):
+    pass
