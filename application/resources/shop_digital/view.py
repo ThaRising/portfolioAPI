@@ -9,7 +9,7 @@ from flask_praetorian import roles_required
 import requests
 from flask import current_app
 from ...shared.exceptions import InvalidPurchaseItem
-from marshmallow import pprint
+import json
 
 api = Namespace("shop")
 
@@ -80,32 +80,21 @@ class ShopItemPayment(Resource):
                                  headers=headers)
         access_token = response.json()["access_token"]
         payload = {
-            "intent": "CAPTURE",
-            "purchase_units": [
-                {
-                    "amount": {
-                        "currency_code": "USD",
-                        "value": "100.00"
-                    }
-                }
-            ]
+          "intent": "CAPTURE",
+          "purchase_units": [
+            {
+              "reference_id": str(id_),
+              "amount": {
+                "currency_code": "EUR",
+                "value": item.get("current_price")
+              }
+            }
+          ],
+          "application_context": {
+            "return_url": "",
+            "cancel_url": ""
+          }
         }
-        # payload = {
-        #   "intent": "CAPTURE",
-        #   "purchase_units": [
-        #     {
-        #       "reference_id": str(id_),
-        #       "amount": {
-        #         "currency_code": "EUR",
-        #         "value": item.get("current_price")
-        #       }
-        #     }
-        #   ],
-        #   "application_context": {
-        #     "return_url": "",
-        #     "cancel_url": ""
-        #   }
-        # }
         headers = {
             'accept': "application/json",
             'content-type': "application/json",
@@ -113,7 +102,8 @@ class ShopItemPayment(Resource):
             'authorization': f"Bearer {access_token}"
         }
         response = requests.post(f"{self.base_url}/v2/checkout/orders",
-                                 data=payload,
+                                 data=json.dumps(payload),
                                  headers=headers)
-        pprint(response.content.decode("utf-8"))
-        return response.content.decode("utf-8"), 201
+        return {
+            "order_id": response.json()["id"]
+        }, 201
