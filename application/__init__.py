@@ -23,6 +23,7 @@ def create_app(env: any = ""):
     app.cli.add_command(create_admin)
 
     with app.app_context():
+        from .shared.exceptions import handle_ambiguous_type, handle_auth_error, handle_ambiguous_fields
         from .resources.shop_digital.schema import ShopDigital
         from .resources import portfolio_api, shop_api, Auth
         api.add_namespace(portfolio_api, path="/portfolio")
