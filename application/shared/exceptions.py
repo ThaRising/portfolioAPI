@@ -43,3 +43,9 @@ class DataRangeError(Exception):
 
 class InvalidPurchaseItem(Exception):
     pass
+
+
+@api.errorhandler(InvalidPurchaseItem)
+def handle_ambiguous_type(error):
+    return {'error': 'ERR_INVALID_PURCHASE_ITEM',
+            'message': 'The provided item id does not correspond with a valid product.'}, 400
