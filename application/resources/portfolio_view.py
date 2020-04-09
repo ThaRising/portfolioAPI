@@ -1,7 +1,6 @@
 from flask_restplus import Resource, Namespace
 from application.shared import QueryArgs
 from webargs.flaskparser import use_kwargs, use_args
-from ..shared.exceptions import AmbiguousTypeError, AmbiguousFieldError
 from .portfolio_image.schema import PostArgs, VideoPostArgs
 import flask_praetorian
 from collections import namedtuple
