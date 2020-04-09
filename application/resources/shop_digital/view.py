@@ -6,18 +6,10 @@ from .service import ShopDigitalService
 from .schema import PostArgs, PatchArgs
 from .._image.controller import ImageController
 from flask_praetorian import roles_required
-import requests
-from flask import current_app
 from ...shared.exceptions import InvalidPurchaseItem
-import json
+from ...shared.paypal import Paypal
 
 api = Namespace("shop")
-
-
-@api.errorhandler(InvalidPurchaseItem)
-def handle_ambiguous_type(error):
-    return {'error': 'ERR_INVALID_PURCHASE_ITEM',
-            'message': 'The provided item id does not correspond with a valid product.'}, 400
 
 
 @api.route("/")
@@ -62,48 +54,11 @@ class ShopItem(Resource):
 
 @api.route("/<string:id_>/payment")
 class ShopItemPayment(Resource):
-    base_url = "https://api.sandbox.paypal.com"
-
     def get(self, id_: str):
         item = ShopDigitalController().get({"id": id_}, fields=["current_price"])
         if not item or item is None:
             raise InvalidPurchaseItem
-        headers = {
-            'accept': "application/json",
-            'accept-language': "de",
-            'content-type': "application/x-www-form-urlencoded"
-        }
-        response = requests.post(f"{self.base_url}/v1/oauth2/token",
-                                 data={"grant_type": "client_credentials"},
-                                 auth=(current_app.config['CLIENT_ID'],
-                                       current_app.config['CLIENT_SECRET']),
-                                 headers=headers)
-        access_token = response.json()["access_token"]
-        payload = {
-          "intent": "CAPTURE",
-          "purchase_units": [
-            {
-              "reference_id": str(id_),
-              "amount": {
-                "currency_code": "EUR",
-                "value": item.get("current_price")
-              }
-            }
-          ],
-          "application_context": {
-            "return_url": "",
-            "cancel_url": ""
-          }
-        }
-        headers = {
-            'accept': "application/json",
-            'content-type': "application/json",
-            'accept-language': "de",
-            'authorization': f"Bearer {access_token}"
-        }
-        response = requests.post(f"{self.base_url}/v2/checkout/orders",
-                                 data=json.dumps(payload),
-                                 headers=headers)
+        response = Paypal().make_payment(id_, item)
         return {
             "order_id": response.json()["id"]
         }, 201
