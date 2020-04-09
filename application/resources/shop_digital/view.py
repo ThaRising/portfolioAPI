@@ -8,6 +8,7 @@ from .._image.controller import ImageController
 from flask_praetorian import roles_required
 from ...shared.exceptions import InvalidPurchaseItem
 from ...shared.paypal import Paypal
+from flask import current_app
 
 api = Namespace("shop")
 
@@ -58,7 +59,7 @@ class ShopItemPayment(Resource):
         item = ShopDigitalController().get({"id": id_}, fields=["current_price"])
         if not item or item is None:
             raise InvalidPurchaseItem
-        response = Paypal().make_payment(id_, item)
+        response = Paypal(current_app.config["PAYPAL_URL"]).make_payment(id_, item)
         return {
             "order_id": response.json()["id"]
         }, 201

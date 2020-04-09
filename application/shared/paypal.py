@@ -4,7 +4,8 @@ import json
 
 
 class Paypal:
-    base_url = current_app.config["PAYPAL_URL"]
+    def __init__(self, base_url):
+        self.base_url = base_url
 
     def make_payment(self, id_: int, item):
         headers = {
