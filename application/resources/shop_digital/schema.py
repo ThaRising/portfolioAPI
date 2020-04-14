@@ -34,8 +34,8 @@ class ShopDigitalSchema(ma.SQLAlchemyAutoSchema):
 
     def calc_current_price(self, obj) -> float:
         if not obj.sale:
-            return float("{0:.2f}".format(obj.base_price))
-        return float("{0:.2f}".format(obj.base_price - (obj.base_price * (obj.sale / 100))))
+            return f"{obj.base_price:.2f}"
+        return "{0:.2f}".format(obj.base_price - (obj.base_price * (obj.sale / 100)))
 
 
 class PostArgs(Schema):
