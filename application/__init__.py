@@ -1,24 +1,7 @@
 from flask import Flask
 from .extensions import db, ma, api, guard, limit
 from inspect import isclass
-from pathlib import Path
-
-
-class Prod:
-    DEBUG = False
-    TESTING = False
-    SQLALCHEMY_DATABASE_URI = "sqlite:///data.db"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = "top_secret"
-    JWT_ACCESS_LIFESPAN = {'hours': 2}
-    JWT_REFRESH_LIFESPAN = {'days': 1}
-    RATELIMIT_STRATEGY = "fixed-window-elastic-expiry"
-    IMAGE_UPLOADS = Path(__file__).parent.parent / "uploads"
-
-
-class Dev(Prod):
-    DEBUG = True
-    TESTING = True
+from .config import Prod, Stag
 
 
 def create_app(env: any = ""):
@@ -26,7 +9,7 @@ def create_app(env: any = ""):
     if isclass(env):
         app.config.from_object(env())
     else:
-        app.config.from_object(Prod if not env else Dev)
+        app.config.from_object(Stag if not env else Prod)
 
     db.init_app(app)
     ma.init_app(app)
@@ -40,10 +23,13 @@ def create_app(env: any = ""):
     app.cli.add_command(create_admin)
 
     with app.app_context():
+        from .shared.exceptions import handle_ambiguous_type, handle_auth_error, handle_ambiguous_fields, \
+            handle_image_error, handle_image_warning, handle_paypal_error
         from .resources.shop_digital.schema import ShopDigital
-        from .resources import portfolio_api, shop_api, Auth
+        from .resources import portfolio_api, shop_api, orders_api, Auth
         api.add_namespace(portfolio_api, path="/portfolio")
         api.add_namespace(shop_api, path="/shop")
+        api.add_namespace(orders_api, path="/orders")
         app.add_url_rule('/login/', view_func=Auth.as_view('auth'))
 
         @app.after_request
@@ -52,6 +38,7 @@ def create_app(env: any = ""):
             response.headers['Access-Control-Allow-Headers'] = \
                 "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
             response.headers['Access-Control-Allow-Methods'] = "POST, GET, PATCH, DELETE"
+            response.headers['Access-Control-Expose-Headers'] = "Content-Disposition, x-filename"
             return response
 
         return app

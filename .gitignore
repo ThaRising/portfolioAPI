@@ -2,6 +2,7 @@
 .idea
 venv
 *.env
+application/config.py
 
 # Exclude compiled files
 __pycache__
@@ -17,3 +18,4 @@ dist
 
 # Exclude uploaded test files
 uploads
+downloads

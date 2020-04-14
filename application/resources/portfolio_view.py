@@ -1,7 +1,6 @@
 from flask_restplus import Resource, Namespace
 from application.shared import QueryArgs
 from webargs.flaskparser import use_kwargs, use_args
-from ..shared.exceptions import AmbiguousTypeError, AmbiguousFieldError
 from .portfolio_image.schema import PostArgs, VideoPostArgs
 import flask_praetorian
 from collections import namedtuple
@@ -12,25 +11,6 @@ from .portfolio_video.service import PortfolioVideoService
 from ._image.controller import ImageController
 
 api = Namespace("portfolio")
-
-
-@api.errorhandler(AmbiguousTypeError)
-def handle_ambiguous_type(error):
-    return {'error': 'ERR_AMBIGUOUS_TYPE',
-            'message': 'Either a type value was not provided in the query string,'
-                       ' or the type value is not "video" or "image".'}, 400
-
-
-@api.errorhandler(AmbiguousFieldError)
-def handle_ambiguous_type(error):
-    return {'error': 'ERR_AMBIGUOUS_FIELDS',
-            'message': 'One or some of the specified fields are not fields contained in the schema.'}, 400
-
-
-@api.errorhandler(flask_praetorian.PraetorianError)
-def handle_auth_error(error):
-    return {"error": "ERR_NOT_AUTHORIZED",
-            "message": "Administrative privileges are required to use this endpoint."}, 401
 
 
 @api.route("/")
@@ -66,7 +46,8 @@ class PortfolioCollection(Resource):
         def post_image(post):
             post_args = post
             preview = post_args.pop("preview")
-            preview = ImageController().create({"uri": preview.get("uri"), "alt": preview.get("alt")})
+            preview = ImageController().create({"uri": preview.get("uri"),
+                                                "alt": preview.get("alt")}, preview=True)
 
             content = post_args.pop("content")
             content = [ImageController().create({"uri": i.get("uri"), "alt": i.get("alt")}) for i in content]
@@ -77,7 +58,8 @@ class PortfolioCollection(Resource):
         def post_video(post):
             post_args = post
             preview = post_args.pop("preview")
-            preview = ImageController().create({"uri": preview.get("uri"), "alt": preview.get("alt")})
+            preview = ImageController().create({"uri": preview.get("uri"),
+                                                "alt": preview.get("alt")}, preview=True)
 
             return PortfolioVideoController().create(post_args, fields=query_args.fields, preview=preview)
 

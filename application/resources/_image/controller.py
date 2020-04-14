@@ -10,6 +10,7 @@ import re
 from binascii import a2b_base64
 from flask import current_app
 from pathlib import Path
+from PIL import Image
 
 
 class ImageController(Controller):
@@ -20,8 +21,26 @@ class ImageController(Controller):
         uri = a2b_base64(re.sub('^data:image/.+;base64,', '', params.get("uri")))
         random_chars = (lambda r: "".join([choice(ascii_letters) for i in range(r)]))
         filename = secure_filename(f"{datetime.now()}{random_chars(5)}.png")
-        with open(f"{current_app.config['IMAGE_UPLOADS'] / filename}", 'wb') as f:
+        filepath: str = f"{current_app.config['IMAGE_UPLOADS'] / filename}"
+        with open(filepath, 'wb') as f:
             f.write(uri)
+        # Crop Preview Images to 16:9 Size
+        if kwargs.get("preview", False):
+            im = Image.open(filepath)
+            width = im.size[0]
+            height = im.size[1]
+            aspect = width / float(height)
+            ideal_aspect = 1920 / 1080
+            if aspect > ideal_aspect:
+                new_width = int(ideal_aspect * height)
+                offset = (width - new_width) / 2
+                resize = (offset, 0, width - offset, height)
+            else:
+                new_height = int(width / ideal_aspect)
+                offset = (height - new_height) / 2
+                resize = (0, offset, width, height - offset)
+            cropped = im.crop(resize)
+            cropped.save(filepath)
         return self.service().create({"uri": filename, "alt": params.get("alt")})
 
     def delete(self, key: int) -> None:
