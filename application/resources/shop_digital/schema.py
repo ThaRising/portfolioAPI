@@ -13,6 +13,7 @@ class ShopDigital(db.Model):
     base_price = db.Column(db.Float, nullable=False)
     sale = db.Column(db.Integer, default=0)
     description = db.Column(db.Text)
+    uri = db.Column(db.String, nullable=False)
 
 
 shop_assoc = db.Table("shop_association",
@@ -24,6 +25,7 @@ shop_assoc = db.Table("shop_association",
 class ShopDigitalSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = ShopDigital
+        exclude = ("uri",)
 
     content = ma.Nested(ImageSchema, attribute="images", many=True, required=True)
     preview = ma.Nested(ImageSchema, required=True)

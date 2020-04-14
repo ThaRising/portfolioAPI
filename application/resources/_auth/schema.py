@@ -21,7 +21,7 @@ class User(db.Model):
 
     @classmethod
     def identify(cls, id_):
-        return cls.query.get(id)
+        return cls.query.get(id_)
 
     @property
     def identity(self):

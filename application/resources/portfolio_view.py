@@ -46,7 +46,8 @@ class PortfolioCollection(Resource):
         def post_image(post):
             post_args = post
             preview = post_args.pop("preview")
-            preview = ImageController().create({"uri": preview.get("uri"), "alt": preview.get("alt")})
+            preview = ImageController().create({"uri": preview.get("uri"),
+                                                "alt": preview.get("alt")}, preview=True)
 
             content = post_args.pop("content")
             content = [ImageController().create({"uri": i.get("uri"), "alt": i.get("alt")}) for i in content]
@@ -57,7 +58,8 @@ class PortfolioCollection(Resource):
         def post_video(post):
             post_args = post
             preview = post_args.pop("preview")
-            preview = ImageController().create({"uri": preview.get("uri"), "alt": preview.get("alt")})
+            preview = ImageController().create({"uri": preview.get("uri"),
+                                                "alt": preview.get("alt")}, preview=True)
 
             return PortfolioVideoController().create(post_args, fields=query_args.fields, preview=preview)
 
